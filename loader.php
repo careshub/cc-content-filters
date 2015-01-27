@@ -32,7 +32,7 @@ if ( ! defined( 'WPINC' ) ) {
  * BuddyPress-dependent filters should be added to this class.
  *
  * @package CC Functionality Plugin
- * @since 0.1.0
+ * @since 1.0.0
  */
 
 function cc_content_filters_class_init(){

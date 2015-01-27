@@ -312,6 +312,7 @@ class CC_Content_Filters {
 	 */
 	public function register_shortcodes(){
 		add_shortcode('mapwidget', array( $this, 'render_mapwidget_shortcode' ) );
+		add_shortcode('googlecalendar', array( $this, 'render_google_calendar_shortcode' ) );
 	}
 
 	/**
@@ -335,10 +336,35 @@ class CC_Content_Filters {
 		if ( ! empty( $a['args'] ) ) {
 			// Remove HTML special characters, especially ampersand entities.
 			$a['args'] = htmlspecialchars_decode( $a['args'] );
-			
+
 			$retval = '<script src="http://maps.communitycommons.org/jscripts/mapWidget.js?' . $a['args'] . '"></script>';
 		}
 
 		return $retval;
 	}
+
+	public function render_google_calendar_shortcode( $atts ){
+		// Short code in WP content takes the form:
+		// [googlecalendar args="height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=4m1j42139um8lvhovgb1nkf0ds%40group.calendar.google.com&amp;color=%23B1440E&amp;src=cacti.phi%40gmail.com&amp;color=%232952A3&amp;src=en.usa%23holiday%40group.v.calendar.google.com&amp;color=%232F6309&amp;ctz=America%2FLos_Angeles" width="800"]
+
+		// Final code takes the form:
+		// 	<iframe src="https://www.google.com/calendar/embed?height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=4m1j42139um8lvhovgb1nkf0ds%40group.calendar.google.com&amp;color=%23B1440E&amp;src=cacti.phi%40gmail.com&amp;color=%232952A3&amp;src=en.usa%23holiday%40group.v.calendar.google.com&amp;color=%232F6309&amp;ctz=America%2FLos_Angeles" style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
+
+		$a = shortcode_atts( array(
+		        'args' => null,
+		        'width' => 800,
+		    ), $atts );
+		$retval = '';
+
+		if ( ! empty( $a['args'] ) ) {
+			// Set iframe height to match src height
+			parse_str($a['args'], $query_args);
+
+			$retval = '<iframe src="https://www.google.com/calendar/embed?' . $a['args'] . '" width="' . $a['width'] . '" height="' . $query_args['height'] . '" frameborder="0" scrolling="no" style="border-width:0"></iframe>';
+		}
+
+		return $retval;
+	}
+
+
 }
