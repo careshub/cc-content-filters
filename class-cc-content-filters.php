@@ -72,8 +72,8 @@ class CC_Content_Filters {
 
 
 		//	1. Content filter
-		//		a. Map Widget shortcode.
-				// add_filter('bp_get_group_create_button', array( $this, 'remove_create_a_group_button' ) );
+		//	Register shortcodes
+			add_action( 'init', array( $this, 'register_shortcodes') );
 
 	}
 
@@ -306,12 +306,39 @@ class CC_Content_Filters {
 	/* 1. Shortcodes
 	*****************************************************************************/
 	/**
-	 * 1a. Create map widget script tag via shortcode, so subscribers can include map widgets.
+	 * Warn WP that we have some shortcodes to watch out for.
 	 *
 	 * @since    1.0.0
 	 */
-	public function mapwidget_shortcode( $args ){
+	public function register_shortcodes(){
+		add_shortcode('mapwidget', array( $this, 'render_mapwidget_shortcode' ) );
+	}
 
-	  return $args;
+	/**
+	 * 1a. Create map widget script tag via shortcode, so subscribers can include map widgets.
+	 *
+	 * @since    1.0.0 
+	 */
+
+	public function render_mapwidget_shortcode( $atts ){
+		// Short code in WP content takes the form:
+		// [mapwidget args="w=200&h=200&ids=ve,graybase,water,MSA,zctas,schSec,schEL,st_hou,st_sen,us_cong,tracts,placebnd,counties,State,roads,places&vr=graybase,water,places&bbox=-15200601.079251733,1905011.4450060106,-6130889.051048269,7149203.081593988"]
+
+		// Final script takes the form:
+		// <script src='http://maps.communitycommons.org/jscripts/mapWidget.js?w=200&h=200&ids=ve,graybase,water,MSA,zctas,schSec,schEL,st_hou,st_sen,us_cong,tracts,placebnd,counties,State,roads,places&vr=graybase,water,places&bbox=-15200601.079251733,1905011.4450060106,-6130889.051048269,7149203.081593988'></script>
+
+		$a = shortcode_atts( array(
+		        'args' => null,
+		    ), $atts );
+		$retval = '';
+
+		if ( ! empty( $a['args'] ) ) {
+			// Remove HTML special characters, especially ampersand entities.
+			$a['args'] = htmlspecialchars_decode( $a['args'] );
+			
+			$retval = '<script src="http://maps.communitycommons.org/jscripts/mapWidget.js?' . $a['args'] . '"></script>';
+		}
+
+		return $retval;
 	}
 }
