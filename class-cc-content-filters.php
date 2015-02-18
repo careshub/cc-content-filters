@@ -312,7 +312,9 @@ class CC_Content_Filters {
 	 */
 	public function register_shortcodes(){
 		add_shortcode('mapwidget', array( $this, 'render_mapwidget_shortcode' ) );
+		add_shortcode('dialwidget', array( $this, 'render_dialwidget_shortcode' ) );
 		add_shortcode('googlecalendar', array( $this, 'render_google_calendar_shortcode' ) );
+		add_shortcode( 'group_membership_request_button', array( $this, 'cc_group_membership_pane_link_shortcode' ) );
 	}
 
 	/**
@@ -343,6 +345,35 @@ class CC_Content_Filters {
 		return $retval;
 	}
 
+	/**
+	 * 1b. Create map widget script tag via shortcode, so subscribers can include map widgets.
+	 *
+	 * @since    1.1.0 
+	 */
+
+	public function render_dialwidget_shortcode( $atts ){
+		// Short code in WP content takes the form:
+		// [dialwidget geoid="05000US06097" indicator="760"]
+
+		// Final script takes the form:
+		// <script src='http://maps.communitycommons.org/jscripts/dialWidget.js?geoid={geoid}&id={id}'></script>
+
+		$a = shortcode_atts( array(
+		        'geoid' 	=> null,
+		        'indicator' => null
+		    ), $atts );
+		$retval = '';
+
+		if ( ! empty( $a ) ) {
+			// Remove HTML special characters, especially ampersand entities.
+			$a = array_map( 'htmlspecialchars_decode' , $a);
+
+			$retval = '<script src="http://maps.communitycommons.org/jscripts/dialWidget.js?geoid=' . $a['geoid'] . '&id=' . $a['indicator'] . '"></script>';
+		}
+
+		return $retval;
+	}
+
 	public function render_google_calendar_shortcode( $atts ){
 		// Short code in WP content takes the form:
 		// [googlecalendar args="height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=4m1j42139um8lvhovgb1nkf0ds%40group.calendar.google.com&amp;color=%23B1440E&amp;src=cacti.phi%40gmail.com&amp;color=%232952A3&amp;src=en.usa%23holiday%40group.v.calendar.google.com&amp;color=%232F6309&amp;ctz=America%2FLos_Angeles" width="800"]
@@ -366,5 +397,105 @@ class CC_Content_Filters {
 		return $retval;
 	}
 
+
+	// Build a Request Membership/Join Group button.
+	// Takes the form: [group_membership_request_button group_id="3"]
+	// Will only create the link for logged-in users who do not belong to the group.
+	function cc_group_membership_pane_link_shortcode( $attr, $content = null ) {
+	  $retval = '';
+
+	  if ( $user_id = get_current_user_id() ) { 
+
+	    $atts = shortcode_atts( array( 'group_id' => 0, 'button' => false ), $attr );
+	    // If no group id was specified, try to get the current group's id
+	    $group_id = ( $atts['group_id'] ) ? $atts['group_id'] : bp_get_current_group_id();
+
+	    // Don't show this link to group members.
+	    if ( $group_id && ! groups_is_user_member( $user_id, $group_id ) ) {
+	      $group = groups_get_group( array( 'group_id' => $group_id ) );
+	      $group_name = bp_get_group_name( $group );
+	      // This comes from bp_groups_template.php
+	      // It's included here rather than just used as is ( bp_get_group_join_button( $group ) ) because we want to change the labels.
+	      // Show different buttons based on group status
+			switch ( $group->status ) {
+				case 'hidden' :
+					return false;
+					break;
+
+				case 'public':
+					$button = array(
+						'id'                => 'join_group',
+						'component'         => 'groups',
+						'must_be_logged_in' => true,
+						'block_self'        => false,
+						'wrapper_class'     => 'group-button ' . $group->status,
+						'wrapper_id'        => 'groupbutton-' . $group->id,
+						'link_href'         => wp_nonce_url( bp_get_group_permalink( $group ) . 'join', 'groups_join_group' ),
+						'link_text'         => 'Join ' . $group_name,
+						'link_title'        => 'Join ' . $group_name,
+						'link_class'        => 'group-button join-group',
+					);
+					break;
+
+				case 'private' :
+
+					// Member has outstanding invitation -
+					// show an "Accept Invitation" button
+					if ( $group->is_invited ) {
+						$button = array(
+							'id'                => 'accept_invite',
+							'component'         => 'groups',
+							'must_be_logged_in' => true,
+							'block_self'        => false,
+							'wrapper_class'     => 'group-button ' . $group->status,
+							'wrapper_id'        => 'groupbutton-' . $group->id,
+							'link_href'         => add_query_arg( 'redirect_to', bp_get_group_permalink( $group ), bp_get_group_accept_invite_link( $group ) ),
+							'link_text'         => 'Accept Invitation to ' . $group_name,
+							'link_title'        => 'Accept Invitation to ' . $group_name,
+							'link_class'        => 'group-button accept-invite',
+						);
+
+					// Member has requested membership but request is pending -
+					// show a "Request Sent" button
+					} elseif ( $group->is_pending ) {
+						$button = array(
+							'id'                => 'membership_requested',
+							'component'         => 'groups',
+							'must_be_logged_in' => true,
+							'block_self'        => false,
+							'wrapper_class'     => 'group-button pending ' . $group->status,
+							'wrapper_id'        => 'groupbutton-' . $group->id,
+							'link_href'         => bp_get_group_permalink( $group ),
+							'link_text'         => 'Request Sent to ' . $group_name,
+							'link_title'        => 'Request Sent to ' . $group_name,
+							'link_class'        => 'group-button pending membership-requested',
+						);
+
+					// Member has not requested membership yet -
+					// show a "Request Membership" button
+					} else {
+						$button = array(
+							'id'                => 'request_membership',
+							'component'         => 'groups',
+							'must_be_logged_in' => true,
+							'block_self'        => false,
+							'wrapper_class'     => 'group-button ' . $group->status,
+							'wrapper_id'        => 'groupbutton-' . $group->id,
+							'link_href'         => wp_nonce_url( bp_get_group_permalink( $group ) . 'request-membership', 'groups_request_membership' ),
+							'link_text'         => 'Request Membership in ' . $group_name,
+							'link_title'        => 'Request Membership in ' . $group_name,
+							'link_class'        => 'group-button request-membership',
+						);
+					}
+
+					break;
+			}
+
+	      $retval = bp_get_button( apply_filters( 'bp_get_group_join_button', $button ) );
+	    }
+	  }
+
+	  return $retval;
+	}
 
 }
