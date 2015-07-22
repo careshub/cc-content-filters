@@ -3,7 +3,7 @@
  * The public-facing functionality of the plugin.
  *
  * @link       http://example.com
- * @since      1.0.0
+ * @since      1.1.0
  *
  * @package    CC Content Filters
  */
@@ -26,7 +26,7 @@ class CC_Content_Filters {
 	 *
 	 * @var     string
 	 */
-	const VERSION = '1.0.0';
+	const VERSION = '1.1.0';
 
 	/**
 	 *
@@ -311,16 +311,19 @@ class CC_Content_Filters {
 	 * @since    1.0.0
 	 */
 	public function register_shortcodes(){
-		add_shortcode('mapwidget', array( $this, 'render_mapwidget_shortcode' ) );
-		add_shortcode('dialwidget', array( $this, 'render_dialwidget_shortcode' ) );
-		add_shortcode('googlecalendar', array( $this, 'render_google_calendar_shortcode' ) );
+		add_shortcode( 'mapwidget', array( $this, 'render_mapwidget_shortcode' ) );
+		add_shortcode( 'dialwidget', array( $this, 'render_dialwidget_shortcode' ) );
+		add_shortcode( 'googlecalendar', array( $this, 'render_google_calendar_shortcode' ) );
 		add_shortcode( 'group_membership_request_button', array( $this, 'cc_group_membership_pane_link_shortcode' ) );
+		add_shortcode( 'member_profile_button', array( $this, 'cc_member_profile_link_shortcode' ) );
+		add_shortcode( 'member_library_button', array( $this, 'cc_member_library_link_shortcode' ) );
+
 	}
 
 	/**
 	 * 1a. Create map widget script tag via shortcode, so subscribers can include map widgets.
 	 *
-	 * @since    1.0.0 
+	 * @since    1.0.0
 	 */
 
 	public function render_mapwidget_shortcode( $atts ){
@@ -348,7 +351,7 @@ class CC_Content_Filters {
 	/**
 	 * 1b. Create map widget script tag via shortcode, so subscribers can include map widgets.
 	 *
-	 * @since    1.1.0 
+	 * @since    1.1.0
 	 */
 
 	public function render_dialwidget_shortcode( $atts ){
@@ -404,7 +407,7 @@ class CC_Content_Filters {
 	function cc_group_membership_pane_link_shortcode( $attr, $content = null ) {
 	  $retval = '';
 
-	  if ( $user_id = get_current_user_id() ) { 
+	  if ( $user_id = get_current_user_id() ) {
 
 	    $atts = shortcode_atts( array( 'group_id' => 0, 'button' => false ), $attr );
 	    // If no group id was specified, try to get the current group's id
@@ -493,6 +496,63 @@ class CC_Content_Filters {
 
 	      $retval = bp_get_button( apply_filters( 'bp_get_group_join_button', $button ) );
 	    }
+	  }
+
+	  return $retval;
+	}
+	/**
+	 * Build a "member profile" button.
+	 * Takes the form: [member_profile_button label="Label Text" button="true"]
+	 * Will only create the link for logged-in users.
+	 *
+	 * @since    1.1.0
+	 *
+	 * @return   string    HTML for the button.
+	 */
+	function cc_member_profile_link_shortcode( $attr, $content = null ) {
+	  $retval = '';
+
+	  if ( $user_id = get_current_user_id() ) {
+
+	    $atts = shortcode_atts( array(
+	    	'label' => 'Visit My Profile',
+	    	'button' => false
+	    	), $attr );
+
+	    $button_class = $atts['button'] ? ' class="button" ' : '';
+	    $label = $atts['label'];
+
+	    $retval = '<a href="' . bp_loggedin_user_domain() . '" title="My user profile"' . $button_class . '>' . $label . '</a>';
+
+	  }
+
+	  return $retval;
+	}
+
+	/**
+	 * Build a "member library" button.
+	 * Takes the form: [member_library_button label="Label Text" button="true"]
+	 * Will only create the link for logged-in users.
+	 *
+	 * @since    1.1.0
+	 *
+	 * @return   string    HTML for the button.
+	 */
+	function cc_member_library_link_shortcode( $attr, $content = null ) {
+	  $retval = '';
+
+	  if ( $user_id = get_current_user_id() ) {
+
+	    $atts = shortcode_atts( array(
+	    	'label' => 'Visit My Library',
+	    	'button' => false
+	    	), $attr );
+
+	    $button_class = $atts['button'] ? ' class="button" ' : '';
+	    $label = $atts['label'];
+
+	    $retval = '<a href="' . user_trailingslashit( bp_loggedin_user_domain() . bp_docs_get_slug() ) . '" title="Visit my library"' . $button_class . '>' . $label . '</a>';
+
 	  }
 
 	  return $retval;
