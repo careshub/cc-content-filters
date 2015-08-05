@@ -318,6 +318,9 @@ class CC_Content_Filters {
 		add_shortcode( 'member_profile_button', array( $this, 'cc_member_profile_link_shortcode' ) );
 		add_shortcode( 'member_library_button', array( $this, 'cc_member_library_link_shortcode' ) );
 
+		// Group-specific shortcodes
+		add_shortcode( 'agsite_open_tool_form', array( $this, 'agsite_open_tool_form' ) );
+
 	}
 
 	/**
@@ -556,6 +559,27 @@ class CC_Content_Filters {
 	  }
 
 	  return $retval;
+	}
+
+	// Group-specific //////////////////////////////////////////////////////////
+
+	/**
+	 * Build a "search/redirect" form for the AgSite group.
+	 * Takes the form: [agsite_open_tool_form]
+	 *
+	 * @since    1.1.0
+	 *
+	 * @return   string    HTML for the button.
+	 */
+	public function agsite_open_tool_form( $attr, $content = null ){
+
+		return '<form action="http://maps.communitycommons.org/viewer/" method="get">
+				<input type="hidden" id="action" name="action" value="tool_map">
+				<input type="hidden" id="tool" name="tool" value="agsite">
+				<input type="hidden" id="groupid" name="groupid" value="661">
+				<input type="text" class="inputGray" id="address" name="address" placeholder="Enter a location" >
+				<input type="submit" id="uxOpenTool" value="Open Tool">
+			</form>';
 	}
 
 }
