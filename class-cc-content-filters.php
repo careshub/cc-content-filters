@@ -26,7 +26,7 @@ class CC_Content_Filters {
 	 *
 	 * @var     string
 	 */
-	const VERSION = '1.1.0';
+	const VERSION = '1.2.0';
 
 	/**
 	 *
@@ -74,6 +74,9 @@ class CC_Content_Filters {
 		//	1. Content filter
 		//	Register shortcodes
 			add_action( 'init', array( $this, 'register_shortcodes') );
+
+		// 2. Add RWJF logo in some group descriptions
+			add_filter( 'bp_get_group_description', array( $this, 'rwjf_logo_in_group_description') );
 
 	}
 
@@ -580,6 +583,22 @@ class CC_Content_Filters {
 				<input type="text" class="inputGray" id="address" name="address" placeholder="Enter a location" >
 				<input type="submit" id="uxOpenTool" value="Open Tool">
 			</form>';
+	}
+
+	/**
+	 * Add a way to add the Robert Wood Johnson Foundation logo to a group's description.
+	 * Insert <!--rwjf-logo--> in the paragraph you want to show the logo near.
+	 * Note that the group loop uses bp_group_description_excerpt() so the logo won't be included there.
+	 *
+	 * @since    1.1.0
+	 *
+	 * @return   string    HTML for the button.
+	 */
+	public function rwjf_logo_in_group_description( $description ) {
+        $logo = '<a href="http://www.rwjf.org/"><img class="alignright" src="/wp-content/plugins/cc-content-filters/images/robert-wood-johnson-fnd-logox150.png" style="margin-top:0;" ></a>';
+        $description = str_replace( '<!--rwjf-logo-->', $logo, $description );
+
+	    return $description;
 	}
 
 }

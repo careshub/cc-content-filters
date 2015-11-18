@@ -15,7 +15,7 @@
  * Plugin Name:       CC Content Filters
  * Plugin URI:        http://example.com/plugin-name-uri/
  * Description:       Content-related filters and short codes.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            David Cavins
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
