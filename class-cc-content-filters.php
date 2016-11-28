@@ -348,7 +348,7 @@ class CC_Content_Filters {
 			// Remove HTML special characters, especially ampersand entities.
 			$a['args'] = htmlspecialchars_decode( $a['args'] );
 
-			$retval = '<script src="http://maps.communitycommons.org/jscripts/mapWidget.js?' . $a['args'] . '"></script>';
+			$retval = '<script src="//maps.communitycommons.org/jscripts/mapWidget.js?' . $a['args'] . '"></script>';
 		}
 
 		return $retval;
@@ -377,7 +377,7 @@ class CC_Content_Filters {
 			// Remove HTML special characters, especially ampersand entities.
 			$a = array_map( 'htmlspecialchars_decode' , $a);
 
-			$retval = '<script src="http://maps.communitycommons.org/jscripts/dialWidget.js?geoid=' . $a['geoid'] . '&id=' . $a['indicator'] . '"></script>';
+			$retval = '<script src="//maps.communitycommons.org/jscripts/dialWidget.js?geoid=' . $a['geoid'] . '&id=' . $a['indicator'] . '"></script>';
 		}
 
 		return $retval;
