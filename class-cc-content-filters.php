@@ -393,6 +393,7 @@ class CC_Content_Filters {
 		$a = shortcode_atts( array(
 		        'args' => null,
 		        'width' => 800,
+		        'height' => 600
 		    ), $atts );
 		$retval = '';
 
@@ -400,7 +401,7 @@ class CC_Content_Filters {
 			// Set iframe height to match src height
 			parse_str($a['args'], $query_args);
 
-			$retval = '<iframe src="https://www.google.com/calendar/embed?' . $a['args'] . '" width="' . $a['width'] . '" height="' . $query_args['height'] . '" frameborder="0" scrolling="no" style="border-width:0"></iframe>';
+			$retval = '<iframe src="https://www.google.com/calendar/embed?' . $a['args'] . '" width="' . $a['width'] . '" height="' . $a['height'] . '" frameborder="0" scrolling="no" style="border-width:0"></iframe>';
 		}
 
 		return $retval;
