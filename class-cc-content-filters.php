@@ -320,6 +320,7 @@ class CC_Content_Filters {
 		add_shortcode( 'group_membership_request_button', array( $this, 'cc_group_membership_pane_link_shortcode' ) );
 		add_shortcode( 'member_profile_button', array( $this, 'cc_member_profile_link_shortcode' ) );
 		add_shortcode( 'member_library_button', array( $this, 'cc_member_library_link_shortcode' ) );
+		add_shortcode( 'progress_bar', array( $this, 'render_progress_bar' ) );
 
 		// Group-specific shortcodes
 		add_shortcode( 'agsite_open_tool_form', array( $this, 'agsite_open_tool_form' ) );
@@ -563,6 +564,51 @@ class CC_Content_Filters {
 	  }
 
 	  return $retval;
+	}
+
+	/**
+	 * Build a progress bar.
+	 * Takes the form: [progress_bar status="2" steps="Uno,Dos,Tres,Cuatro"]
+	 *
+	 * @since    1.1.0
+	 *
+	 * @return   string    HTML for the button.
+	 */
+	function render_progress_bar( $attr, $content = null ) {
+		$retval = '';
+
+		$atts = shortcode_atts( array(
+			'status' => 1,
+			'steps' => 'Emergence,Development,Enactment,Implementation'
+			), $attr );
+
+		$status = abs( (int) $atts['status'] );
+		$steps = array_map( 'trim', explode( ',', $atts['steps'] ) );
+		$num_steps = abs( count( $steps ) );
+		// Make sure the status is in range.
+		if ( $status > $num_steps ) {
+			$status = $num_steps;
+		}
+		$class = ( $num_steps <= 4 ) ? ' narrow' : '';
+
+	    ob_start();
+		?>
+			<div class="progtrckr-container clear">
+				<ol class="progtrckr<?php echo $class; ?>">
+					<?php
+					$i = 1;
+					foreach ( $steps as $step ) {
+						$done = ( $i <= $status ) ? 'progtrckr-done' : 'progtrckr-todo';
+						?>
+						<li class="<?php echo $done; ?>"><?php echo $step; ?></li>
+						<?php
+						$i++;
+					}
+					?>
+				</ol>
+			</div>
+	    <?php
+	    return ob_get_clean();
 	}
 
 	// Group-specific //////////////////////////////////////////////////////////
