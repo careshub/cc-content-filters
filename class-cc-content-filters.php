@@ -623,7 +623,7 @@ class CC_Content_Filters {
 	 */
 	public function agsite_open_tool_form( $attr, $content = null ){
 
-		return '<form action="http://maps.communitycommons.org/viewer/" method="get">
+		return '<form action="https://maps.communitycommons.org/viewer/" method="get">
 				<input type="hidden" id="action" name="action" value="tool_map">
 				<input type="hidden" id="tool" name="tool" value="agsite">
 				<input type="hidden" id="groupid" name="groupid" value="661">
